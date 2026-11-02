@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DFA / NFA String Processing Visualizer</title>
+  <meta name="description" content="Watch a DFA or NFA read a string one symbol at a time and decide whether to accept or reject it.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 40 40" aria-hidden="true">
+      <circle cx="12" cy="20" r="8" fill="none" stroke="currentColor" stroke-width="2.5"/>
+      <circle cx="30" cy="20" r="8" fill="none" stroke="currentColor" stroke-width="2.5"/>
+      <circle cx="30" cy="20" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M20 20h2" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <h1>DFA / NFA Visualizer</h1>
+      <p>Watch a finite automaton read a string, one symbol at a time.</p>
+    </div>
+  </div>
+</header>
+
+<main class="layout">
+
+  <!-- ===================== LEFT: controls ===================== -->
+  <aside class="panel" aria-label="Controls">
+
+    <section class="block">
+      <h2><span class="num">1</span> Automaton</h2>
+      <div class="segmented" role="tablist" aria-label="Automaton type">
+        <button type="button" role="tab" data-type="DFA" class="seg active" aria-selected="true">DFA</button>
+        <button type="button" role="tab" data-type="NFA" class="seg" aria-selected="false">NFA</button>
+      </div>
+
+      <label for="preset" class="field-label">Example</label>
+      <select id="preset"></select>
+      <p id="description" class="hint"></p>
+
+      <details id="customBox" class="custom">
+        <summary>Create your own automaton</summary>
+        <textarea id="customText" spellcheck="false" rows="11" aria-label="Automaton definition"></textarea>
+        <div class="row">
+          <button type="button" id="btnLoadCustom" class="btn small">Load automaton</button>
+          <button type="button" id="btnResetCustom" class="btn small ghost">Undo edits</button>
+        </div>
+        <p id="customMsg" class="msg" role="status"></p>
+        <p class="hint">
+          One transition per line: <code>from, symbol -&gt; target</code>.
+          Use <code>0|1</code> for several symbols, <code>eps</code> for an ε-move (NFA),
+          and <code>#</code> for comments.
+        </p>
+      </details>
+    </section>
+
+    <section class="block">
+      <h2><span class="num">2</span> Input string</h2>
+      <input id="inputString" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+             placeholder="type a string, e.g. 1101" aria-label="Input string">
+      <p id="inputMsg" class="msg" role="status"></p>
+      <div class="field-label">Quick examples <span class="legend-inline"><i class="dot ok"></i>accepted <i class="dot bad"></i>rejected</span></div>
+      <div id="samples" class="chips"></div>
+    </section>
+
+    <section class="block">
+      <h2><span class="num">3</span> Run</h2>
+      <div class="btn-row">
+        <button type="button" id="btnPlay" class="btn primary">Start</button>
+        <button type="button" id="btnPrev" class="btn">&lsaquo; Prev</button>
+        <button type="button" id="btnNext" class="btn">Next &rsaquo;</button>
+        <button type="button" id="btnReset" class="btn ghost">Reset</button>
+      </div>
+      <label class="speed" for="speed">
+        <span>Speed</span>
+        <input id="speed" type="range" min="1" max="5" step="1" value="3">
+        <span id="speedLabel" class="speed-label">Normal</span>
+      </label>
+      <p class="hint keys">Keyboard: <kbd>Space</kbd> start/pause · <kbd>←</kbd> <kbd>→</kbd> step · <kbd>R</kbd> reset</p>
+    </section>
+
+  </aside>
+
+  <!-- ===================== RIGHT: stage ===================== -->
+  <section class="stage" aria-label="Visualization">
+
+    <div class="card diagram-card">
+      <div class="card-head">
+        <h2 id="automatonTitle">Automaton</h2>
+        <ul class="legend" aria-label="Legend">
+          <li><i class="key key-start"></i>start</li>
+          <li><i class="key key-final"></i>final</li>
+          <li><i class="key key-active"></i>active</li>
+          <li><i class="key key-ok"></i>accept</li>
+          <li><i class="key key-bad"></i>reject</li>
+        </ul>
+      </div>
+      <svg id="diagram" role="img" aria-label="State diagram of the automaton" preserveAspectRatio="xMidYMid meet"></svg>
+      <p id="formal" class="formal"></p>
+      <p class="hint center">Tip: drag the states to rearrange the diagram.</p>
+    </div>
+
+    <div class="card tape-card">
+      <div class="card-head"><h2>Input tape</h2></div>
+      <div id="tape" class="tape" aria-label="Input string symbols"></div>
+      <p id="stepText" class="step-text" aria-live="polite"></p>
+    </div>
+
+    <div id="result" class="result hidden" role="status" aria-live="assertive"></div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-head"><h2>Transition table</h2></div>
+        <div id="tableWrap" class="table-wrap"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>Execution log</h2></div>
+        <div id="log" class="log"></div>
+      </div>
+    </div>
+
+  </section>
+</main>
+
+<footer class="foot">
+  DFA / NFA String Processing Visualizer · plain HTML, CSS, JavaScript and SVG · works offline
+</footer>
+
+<script src="js/dfa.js"></script>
+<script src="js/nfa.js"></script>
+<script src="js/presets.js"></script>
+<script src="js/parser.js"></script>
+<script src="js/visualization.js"></script>
+<script src="js/animation.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
